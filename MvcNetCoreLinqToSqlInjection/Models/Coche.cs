@@ -1,6 +1,6 @@
 ﻿namespace MvcNetCoreLinqToSqlInjection.Models
 {
-    public class Coche: ICoche
+    public class Coche : ICoche
     {
         public string Marca { get; set; }
         public string Modelo { get; set; }

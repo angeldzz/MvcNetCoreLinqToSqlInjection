@@ -1,0 +1,15 @@
+﻿<h1>Crear Doctor</h1>
+<a asp-action="Index" asp-controller="Doctores">Volver al listado</a>
+<form method="post">
+    <label for="IdDoctor">IdDoctor:</label>
+    <input type="text" id="IdDoctor" name="IdDoctor" required />
+    <label for="Apellido">Apellido:</label>
+    <input type="text" id="Apellido" name="Apellido" required />
+    <label for="Especialidad">Especialidad:</label>
+    <input type="text" id="Especialidad" name="Especialidad" required />
+    <label for="Salario">Salario:</label>
+    <input type="number" id="Salario" name="Salario" required />
+    <label for="IdHospital">Id Hospital:</label>
+    <input type="number" id="IdHospital" name="IdHospital" required />
+    <button type="submit">Crear</button>
+</form>

@@ -1,13 +1,23 @@
 using MvcNetCoreLinqToSqlInjection.Models;
+using MvcNetCoreLinqToSqlInjection.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+Coche car = new Coche();
+car.Marca = "Ferrari";
+car.Modelo = "F40";
+car.Imagen = "lamine.png";
+car.Velocidad = 0;
+car.VelocidadMaxima = 200;
 
+builder.Services.AddSingleton<ICoche, Coche>(x => car);
+builder.Services.AddTransient<RepositoryDoctoresSQLServer>();
 //Resolvemos el Servicio Coche para la Injeccion
-//builder.Services.AddSingleton<Coche>();
-builder.Services.AddSingleton<Deportivo>();
+//builder.Services.AddSingleton<ICoche, Coche>();
+//builder.Services.AddSingleton<ICoche, Coche>();
+//builder.Services.AddSingleton<ICoche, Deportivo>();
 
 var app = builder.Build();
 
