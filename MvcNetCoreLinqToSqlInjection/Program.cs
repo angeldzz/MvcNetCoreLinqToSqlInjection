@@ -13,7 +13,9 @@ car.Velocidad = 0;
 car.VelocidadMaxima = 200;
 
 builder.Services.AddSingleton<ICoche, Coche>(x => car);
-builder.Services.AddTransient<RepositoryDoctoresSQLServer>();
+//Si usamos ORACLE debemos de debolber el RepositoryDoctoresOracle
+builder.Services.AddTransient<IRepositoryDoctores, RepositoryDoctoresSQLServer>();
+//builder.Services.AddTransient<IRepositoryDoctores, RepositoryDoctoresOracle>();
 //Resolvemos el Servicio Coche para la Injeccion
 //builder.Services.AddSingleton<ICoche, Coche>();
 //builder.Services.AddSingleton<ICoche, Coche>();

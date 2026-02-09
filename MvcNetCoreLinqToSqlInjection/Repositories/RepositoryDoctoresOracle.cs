@@ -1,38 +1,45 @@
-﻿using Microsoft.Data.SqlClient;
-using MvcNetCoreLinqToSqlInjection.Models;
+﻿using MvcNetCoreLinqToSqlInjection.Models;
+using Oracle.ManagedDataAccess.Client;
 using System.Data;
 
 namespace MvcNetCoreLinqToSqlInjection.Repositories
 {
     #region STORED PROCEDURE
     /*
-create procedure SP_DELETE_DOCTOR
-(@iddoctor int)
-as
-    delete from DOCTOR where DOCTOR_NO=@iddoctor
-go
-
-create procedure SP_UPDATE_DOCTOR
-(@idhospital int, @iddoctor int, @apellido nvarchar(50), @especialidad nvarchar(50), @salario int)
+create or replace procedure SP_DELETE_DOCTOR
+(p_iddoctor DOCTOR.DOCTOR_NO%type)
 AS
-	UPDATE DOCTOR SET HOSPITAL_COD=@idhospital, DOCTOR_NO=@iddoctor,APELLIDO=@apellido,ESPECIALIDAD=@especialidad,SALARIO=@salario 
-	WHERE DOCTOR_NO = @iddoctor
-GO
-    */
+BEGIN
+    DELETE FROM DOCTOR
+    WHERE DOCTOR_NO = p_iddoctor;
+    COMMIT;
+end;
+create or replace procedure SP_UPDATE_DOCTOR
+(p_idhospital DOCTOR.HOSPITAL_COD%type, p_iddoctor DOCTOR.DOCTOR_NO%type, p_apellido DOCTOR.APELLIDO%type, p_especialidad DOCTOR.ESPECIALIDAD%type, p_salario DOCTOR.SALARIO%type)
+AS
+BEGIN
+    UPDATE DOCTOR SET HOSPITAL_COD=p_idhospital, DOCTOR_NO=p_iddoctor,APELLIDO=p_apellido,ESPECIALIDAD=p_especialidad,SALARIO=p_salario 
+    WHERE DOCTOR_NO = p_iddoctor;
+    COMMIT;
+end;
+*/
     #endregion
-    public class RepositoryDoctoresSQLServer: IRepositoryDoctores
+    public class RepositoryDoctoresOracle: IRepositoryDoctores
     {
-        private SqlConnection cn;
-        private SqlCommand com;
+
         private DataTable tablaDoctor;
-        public RepositoryDoctoresSQLServer()
+        private OracleConnection cn;
+        private OracleCommand com;
+
+        public RepositoryDoctoresOracle()
         {
-            string connectionString = "Data Source=LOCALHOST\\DEVELOPER;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Encrypt=True;Trust Server Certificate=True";
-            this.cn = new SqlConnection(connectionString);
-            this.com = new SqlCommand();
+            string connectionString = @"Data Source=localhost:1521/FREEPDB1;Persist Security Info=True;User Id=SYSTEM; Password=oracle;";
+            this.cn = new OracleConnection(connectionString);
+            this.com = new OracleCommand();
             this.com.Connection = this.cn;
-            SqlDataAdapter ad = new SqlDataAdapter("SELECT * FROM DOCTOR", this.cn);
             this.tablaDoctor = new DataTable();
+            string sql = "SELECT * FROM DOCTOR";
+            OracleDataAdapter ad = new OracleDataAdapter(sql, this.cn);
             ad.Fill(this.tablaDoctor);
         }
         public List<Doctor> GetDoctores()
@@ -50,55 +57,59 @@ GO
                 doctor.IdHospital = row.Field<int>("HOSPITAL_COD");
                 doctores.Add(doctor);
             }
-        return doctores;
+            return doctores;
         }
         public async Task CreateDoctorAsync(int idDoctor, string apellido, string especialidad,
                                         int salario, int idHospital)
         {
-            string sql = "INSERT INTO DOCTOR VALUES (@IDHOSPITAL,@IDDOCTOR, @APELLIDO, @ESPECIALIDAD, @SALARIO)";
-            this.com.Parameters.AddWithValue("@IDDOCTOR", idDoctor);
-            this.com.Parameters.AddWithValue("@APELLIDO", apellido);
-            this.com.Parameters.AddWithValue("@ESPECIALIDAD", especialidad);
-            this.com.Parameters.AddWithValue("@SALARIO", salario);
-            this.com.Parameters.AddWithValue("@IDHOSPITAL", idHospital);
+            string sql = "INSERT INTO DOCTOR VALUES (:IDHOSPITAL,:IDDOCTOR, :APELLIDO, :ESPECIALIDAD, :SALARIO)";
+            //AQUI VAN LOS PARAMETROS Los cuales cambian de SQL a ORACLE;
+            OracleParameter pamIdHospital = new OracleParameter(":IDHOSPITAL", idHospital);
+            OracleParameter pamIdDoctor = new OracleParameter(":IDDOCTOR", idDoctor);
+            OracleParameter pamApellido = new OracleParameter(":APELLIDO", apellido);
+            OracleParameter pamEspecialidad = new OracleParameter(":ESPECIALIDAD", especialidad);
+            OracleParameter pamSalario = new OracleParameter(":SALARIO", salario);
+            this.com.Parameters.Add(pamIdHospital);
+            this.com.Parameters.Add(pamIdDoctor);
+            this.com.Parameters.Add(pamApellido);
+            this.com.Parameters.Add(pamEspecialidad);
+            this.com.Parameters.Add(pamSalario);
             this.com.CommandType = CommandType.Text;
             this.com.CommandText = sql;
             await this.cn.OpenAsync();
             await this.com.ExecuteNonQueryAsync();
-            await this.cn.CloseAsync();
-            await this.cn.CloseAsync();
             this.com.Parameters.Clear();
+            await this.cn.CloseAsync();
         }
 
         public async Task DeleteDoctorAsync(int iddoctor)
         {
             string sql = "SP_DELETE_DOCTOR";
-            this.com.Parameters.AddWithValue("@iddoctor", iddoctor);
+            OracleParameter pamIdDoctor = new OracleParameter(":P_IDDOCTOR", iddoctor);
+            this.com.Parameters.Add(pamIdDoctor);
             this.com.CommandType = CommandType.StoredProcedure;
             this.com.CommandText = sql;
             await this.cn.OpenAsync();
             await this.com.ExecuteNonQueryAsync();
             this.com.Parameters.Clear();
             await this.cn.CloseAsync();
-
         }
-
         public async Task UpdateDoctorAsync(int idDoctor, string apellido, string especialidad, int salario, int idHospital)
         {
             string sql = "SP_UPDATE_DOCTOR";
-            this.com.Parameters.AddWithValue("@idDoctor", idDoctor);
-            this.com.Parameters.AddWithValue("@apellido", apellido);
-            this.com.Parameters.AddWithValue("@especialidad", especialidad);
-            this.com.Parameters.AddWithValue("@salario", salario);
-            this.com.Parameters.AddWithValue("@idHospital", idHospital);
+            this.com.Parameters.Add(":p_idhospital", idHospital);
+            this.com.Parameters.Add(":p_iddoctor", idDoctor);
+            this.com.Parameters.Add(":p_apellido", apellido);
+            this.com.Parameters.Add(":p_especialidad", especialidad);
+            this.com.Parameters.Add(":p_salario", salario);
             this.com.CommandType = CommandType.StoredProcedure;
             this.com.CommandText = sql;
+
             await this.cn.OpenAsync();
             await this.com.ExecuteNonQueryAsync();
             this.com.Parameters.Clear();
             await this.cn.CloseAsync();
         }
-
         public List<Doctor> GetDoctoresEspecialidad(string especialidad)
         {
             var consulta = from datos in this.tablaDoctor.AsEnumerable()

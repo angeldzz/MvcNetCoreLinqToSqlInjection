@@ -1,27 +1,28 @@
-﻿<h1>Crear Doctor</h1>
+﻿@model Doctor
+<h1>Crear Doctor</h1>
 <a class="btn btn-link p-0 mb-3" asp-action="Index" asp-controller="Doctores">Volver al listado</a>
 <form method="post" class="row g-3">
     <div class="col-md-6">
         <label for="IdDoctor" class="form-label">IdDoctor:</label>
-        <input type="text" id="IdDoctor" name="IdDoctor" class="form-control" required />
+        <input type="text" id="IdDoctor" name="IdDoctor" class="form-control" value="@Model.IdDoctor" required readonly />
     </div>
     <div class="col-md-6">
         <label for="Apellido" class="form-label">Apellido:</label>
-        <input type="text" id="Apellido" name="Apellido" class="form-control" required />
+        <input type="text" id="Apellido" name="Apellido" class="form-control" value="@Model.Apellido" required />
     </div>
     <div class="col-md-6">
         <label for="Especialidad" class="form-label">Especialidad:</label>
-        <input type="text" id="Especialidad" name="Especialidad" class="form-control" required />
+        <input type="text" id="Especialidad" name="Especialidad" class="form-control" value="@Model.Especialidad" required />
     </div>
     <div class="col-md-6">
         <label for="Salario" class="form-label">Salario:</label>
-        <input type="number" id="Salario" name="Salario" class="form-control" required />
+        <input type="number" id="Salario" name="Salario" class="form-control" value="@Model.Salario" required />
     </div>
     <div class="col-md-6">
         <label for="IdHospital" class="form-label">Id Hospital:</label>
-        <input type="number" id="IdHospital" name="IdHospital" class="form-control" required />
+        <input type="number" id="IdHospital" name="IdHospital" class="form-control" value="@Model.IdHospital" required />
     </div>
     <div class="col-12">
-        <button type="submit" class="btn btn-primary">Crear</button>
+        <button type="submit" class="btn btn-primary">Actualizar</button>
     </div>
 </form>
